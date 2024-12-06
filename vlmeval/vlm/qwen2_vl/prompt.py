@@ -87,6 +87,8 @@ class Qwen2VLPromptMixin:
         """change the prompt for MCQ dataset: use chinese prompt if the question contains chinese characters."""
         MCQ_CN_PROMPT = '请直接回答选项字母。'
         MCQ_EN_PROMPT = 'Please select the correct answer from the options above.'
+        # sicong: format CoT prompt
+        MCQ_EN_PROMPT = ' Think step by step and then select the correct answer from the options above.'
 
         import string
 
@@ -125,6 +127,8 @@ class Qwen2VLPromptMixin:
     def _build_yorn_prompt(self, line, dataset: str) -> list[dict[str, str]]:
         """change the prompt for YORN dataset:"""
         YORN_PROMPT = ' Please answer yes or no.'
+        # sicong: format CoT prompt
+        YORN_PROMPT = ' Think step by step and then answer yes or no.'
 
         tgt_path = self.dump_image(line, dataset)
         question = line['question']
@@ -141,7 +145,8 @@ class Qwen2VLPromptMixin:
     def _build_vqa_prompt(self, line, dataset: str) -> list[dict[str, str]]:
         """change the prompt for VQA dataset:"""
         VQA_PROMPT = '\nPlease try to answer the question with short words or phrases if possible.'
-
+        # sicong: format CoT prompt
+        VQA_PROMPT = '\nThink step by step and then try to answer the question with short words or phrases if possible.'
         tgt_path = self.dump_image(line, dataset)
         question = line['question']
         msgs = []

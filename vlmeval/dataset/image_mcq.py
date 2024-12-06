@@ -230,6 +230,18 @@ class ImageMCQDataset(ImageBaseDataset):
         data = load(eval_file)
         data = data.sort_values(by='index')
         data['prediction'] = [str(x) for x in data['prediction']]
+        # sicong: parse CoT answers
+        # if prediction ends with \n, remove it iteratively
+        import pandas as pd
+        for i in range(len(data['prediction'])):
+            while data['prediction'][i].endswith('\n'):
+                # data['prediction'][i] = data['prediction'][i][:-1]
+                data.loc[i, 'prediction'] = data.loc[i, 'prediction'][:-1]
+        # if "### Answer:" in the prediction, only keep content after it, and strip
+        for i in range(len(data['prediction'])):
+            if "### Answer:" in data['prediction'][i]:
+                data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("### Answer:")[-1].strip()
+
         # If not choice label, then use lower case
         for k in data.keys():
             data[k.lower() if k not in list(string.ascii_uppercase) else k] = data.pop(k)
