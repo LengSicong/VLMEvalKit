@@ -46,7 +46,7 @@ class OpenAIWrapper(BaseAPI):
                  max_tokens: int = 1024,
                  img_size: int = 512,
                  img_detail: str = 'low',
-                 use_azure: bool = False,
+                 use_azure: bool = True,
                  **kwargs):
 
         self.model = model
