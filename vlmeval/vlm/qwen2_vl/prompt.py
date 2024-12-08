@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import os
 
 class Qwen2VLPromptMixin:
     """
@@ -87,6 +87,9 @@ class Qwen2VLPromptMixin:
         """change the prompt for MCQ dataset: use chinese prompt if the question contains chinese characters."""
         MCQ_CN_PROMPT = '请直接回答选项字母。'
         MCQ_EN_PROMPT = 'Please select the correct answer from the options above.'
+        if int(os.getenv("ENABLE_COT", "0")):
+            MCQ_EN_PROMPT = ' Think step by step and then select the correct answer from the options above.'
+            print(f"MCQ_CN_PROMPT: {MCQ_CN_PROMPT}")
 
         import string
 
@@ -141,6 +144,9 @@ class Qwen2VLPromptMixin:
     def _build_vqa_prompt(self, line, dataset: str) -> list[dict[str, str]]:
         """change the prompt for VQA dataset:"""
         VQA_PROMPT = '\nPlease try to answer the question with short words or phrases if possible.'
+        if int(os.getenv("ENABLE_COT", "0")):
+            VQA_PROMPT = '\nPlease think step by step and then try to answer the question with short words or phrases if possible.'
+            print(f"VQA_PROMPT: {VQA_PROMPT}")
 
         tgt_path = self.dump_image(line, dataset)
         question = line['question']
