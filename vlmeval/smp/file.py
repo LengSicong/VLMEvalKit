@@ -153,6 +153,7 @@ def dump(data, f, **kwargs):
 
     def dump_tsv(data, f, quoting=csv.QUOTE_ALL):
         data.to_csv(f, sep='\t', index=False, encoding='utf-8', quoting=quoting)
+    os.makedirs(osp.dirname(f), exist_ok=True)
 
     handlers = dict(pkl=dump_pkl, json=dump_json, jsonl=dump_jsonl, xlsx=dump_xlsx, csv=dump_csv, tsv=dump_tsv)
     suffix = f.split('.')[-1]

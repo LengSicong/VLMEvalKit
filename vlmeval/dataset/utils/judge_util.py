@@ -22,7 +22,7 @@ def build_judge(**kwargs):
             'gpt-4o-0806': 'gpt-4o-2024-08-06',
             'gpt-4o-mini': 'gpt-4o-mini-2024-07-18',
         }
-        model_version = model_map[model]
+        model_version = model_map.get(model, model)
     else:
         model_version = LOCAL_LLM
     model = OpenAIWrapper(model_version, **kwargs)

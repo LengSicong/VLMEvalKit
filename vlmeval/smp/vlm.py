@@ -138,7 +138,8 @@ def read_ok(img_path):
 
 def gpt_key_set():
     openai_key = os.environ.get('OPENAI_API_KEY', None)
-    return isinstance(openai_key, str) and openai_key.startswith('sk-')
+    azure_openai_key = os.environ.get('AZURE_OPENAI_API_KEY', None)
+    return isinstance(openai_key, str) or isinstance(azure_openai_key, str)
 
 
 def apiok(wrapper):
