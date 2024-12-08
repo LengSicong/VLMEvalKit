@@ -174,6 +174,7 @@ def main():
         eval_id = f"T{date}_G{commit_id}_{opt_postfix}"
 
         pred_root = osp.join(args.work_dir, model_name, eval_id)
+        print(f"Result will be saved in {pred_root}")
         pred_root_meta = osp.join(args.work_dir, model_name)
         os.makedirs(pred_root_meta, exist_ok=True)
 
