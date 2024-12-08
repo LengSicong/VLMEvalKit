@@ -73,7 +73,10 @@ class Qwen2VLPromptMixin:
         prompt += f'Question: {question}\n'
         if len(options):
             prompt += options_prompt
-            prompt += 'Please select the correct answer from the options above. \n'
+            if int(os.getenv("ENABLE_COT", "0")):
+                prompt += 'Please think step by step and then select the correct answer from the options above. \n'
+            else:
+                prompt += 'Please select the correct answer from the options above. \n'
         prompt = prompt.rstrip()
         msgs = []
         if isinstance(tgt_path, list):
@@ -88,8 +91,10 @@ class Qwen2VLPromptMixin:
         MCQ_CN_PROMPT = '请直接回答选项字母。'
         MCQ_EN_PROMPT = 'Please select the correct answer from the options above.'
         if int(os.getenv("ENABLE_COT", "0")):
-            MCQ_EN_PROMPT = ' Think step by step and then select the correct answer from the options above.'
+            MCQ_EN_PROMPT = 'Think step by step and then select the correct answer from the options above.'
+            MCQ_CN_PROMPT = '请按步骤思考，然后从上面的选项中选择正确答案。'
             print(f"MCQ_EN_PROMPT: {MCQ_EN_PROMPT}")
+            print(f"MCQ_CN_PROMPT: {MCQ_CN_PROMPT}")
 
         import string
 
@@ -128,6 +133,9 @@ class Qwen2VLPromptMixin:
     def _build_yorn_prompt(self, line, dataset: str) -> list[dict[str, str]]:
         """change the prompt for YORN dataset:"""
         YORN_PROMPT = ' Please answer yes or no.'
+        if int(os.getenv("ENABLE_COT", "0")):
+            YORN_PROMPT = ' Please think step by step and then answer yes or no.'
+            print(f"YORN_PROMPT: {YORN_PROMPT}")
 
         tgt_path = self.dump_image(line, dataset)
         question = line['question']
