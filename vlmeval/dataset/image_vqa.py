@@ -55,6 +55,14 @@ class ImageVQADataset(ImageBaseDataset):
         dataset = self.dataset_name
         assert 'answer' in data and 'prediction' in data
         data['prediction'] = [str(x) for x in data['prediction']]
+
+        # NOTE -- workaround for COT
+        if int(os.getenv("ENABLE_COT", "0")):
+            # apply rstrip to all predictions
+            data['prediction'] = data['prediction'].apply(lambda x: x.rstrip("\n"))
+            # if "### Answer:" in the prediction, only keep content after it, and strip
+            data['prediction'] = data['prediction'].apply(lambda x: x.split("### Answer:")[-1].strip() if "### Answer:" in x else x)
+
         data['answer'] = [str(x) for x in data['answer']]
         lt = len(data)
         pool = mp.Pool(16)
