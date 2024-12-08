@@ -168,7 +168,10 @@ def main():
     for _, model_name in enumerate(args.model):
         model = None
         date, commit_id = timestr('day'), githash(digits=8)
-        eval_id = f"T{date}_G{commit_id}"
+
+        enable_cot = os.getenv('ENABLE_COT', '0')
+        opt_postfix = f'_cot{enable_cot}'
+        eval_id = f"T{date}_G{commit_id}_{opt_postfix}"
 
         pred_root = osp.join(args.work_dir, model_name, eval_id)
         pred_root_meta = osp.join(args.work_dir, model_name)

@@ -8,5 +8,5 @@ DATASET=${DATASET:-"A-OKVQA"}
 CKPT=${CKPT:-"Qwen/Qwen2-VL-2B-Instruct"}
 
 python -m debugpy_cli \
-    run.py --data  \
+    run.py --data $DATASET \
     --model $CKPT --verbose --judge exact_matching
