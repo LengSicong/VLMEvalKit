@@ -89,7 +89,7 @@ class Qwen2VLPromptMixin:
         MCQ_EN_PROMPT = 'Please select the correct answer from the options above.'
         if int(os.getenv("ENABLE_COT", "0")):
             MCQ_EN_PROMPT = ' Think step by step and then select the correct answer from the options above.'
-            print(f"MCQ_CN_PROMPT: {MCQ_CN_PROMPT}")
+            print(f"MCQ_EN_PROMPT: {MCQ_EN_PROMPT}")
 
         import string
 
