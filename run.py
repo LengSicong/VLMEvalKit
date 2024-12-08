@@ -8,6 +8,7 @@ from vlmeval.inference_video import infer_data_job_video
 from vlmeval.inference_mt import infer_data_job_mt
 from vlmeval.smp import *
 from vlmeval.utils.result_transfer import MMMU_result_transfer, MMTBench_result_transfer
+from transformers import PretrainedConfig
 
 
 def build_model_from_config(cfg):
@@ -115,6 +116,7 @@ You can launch the evaluation by setting either --data and --model or --config.
     parser.add_argument('--retry', type=int, default=None, help='retry numbers for API VLMs')
     # Explicitly Set the Judge Model
     parser.add_argument('--judge', type=str, default=None)
+    parser.add_argument('--azure', action='store_true', default=False)
     # Logging Utils
     parser.add_argument('--verbose', action='store_true')
     # Configuration for Resume
@@ -279,6 +281,14 @@ def main():
 
                 if model is None:
                     model = model_name  # which is only a name
+                
+                if model_name in supported_VLM:
+                    continue # deal with it inside infer_data_job*
+                else:
+                    config = PretrainedConfig.from_pretrained(model_name)
+                    arch = config.architectures[0]
+                    if arch in supported_VLM:
+                        model = supported_VLM[arch](model_path=model_name)
 
                 # Perform the Inference
                 if dataset.MODALITY == 'VIDEO':
@@ -315,6 +325,7 @@ def main():
                 # Set the judge kwargs first before evaluation or dumping
 
                 judge_kwargs = {
+                    'use_azure': args.azure,
                     'nproc': args.nproc,
                     'verbose': args.verbose,
                     'retry': args.retry if args.retry is not None else 3
