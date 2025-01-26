@@ -50,7 +50,7 @@ class OpenAIWrapper(BaseAPI):
                  **kwargs):
 
         self.model = model
-        self.model = 'gpt-3.5-turbo-0613' # Sicong: only use gpt-3.5-turbo-0613
+        self.model = 'gpt-4-1106-Preview' # Sicong: only use gpt-3.5-turbo-0613
         self.cur_idx = 0
         self.fail_msg = 'Failed to obtain answer via API. '
         self.max_tokens = max_tokens
