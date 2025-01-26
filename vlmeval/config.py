@@ -285,7 +285,11 @@ xgen_mm_series = {
 qwen2vl_series = {
     'Qwen-VL-Max-0809': partial(Qwen2VLAPI, model='qwen-vl-max-0809', min_pixels=1280*28*28, max_pixels=16384*28*28),
     'Qwen-VL-Plus-0809': partial(Qwen2VLAPI, model='qwen-vl-plus-0809', min_pixels=1280*28*28, max_pixels=16384*28*28),
-    'Qwen2-VL-72B-Instruct': partial(Qwen2VLChat, model_path='/mnt/zhangh/sicong/vl3_data/checkpoints/Qwen/Qwen2-VL-72B-Instruct', min_pixels=1280*28*28, max_pixels=16384*28*28),
+    # 'Qwen2-VL-72B-Instruct': partial(Qwen2VLChat, model_path='/data/jx/pretrained_models/Qwen/Qwen2-VL-72B-Instruct/', min_pixels=1280*28*28, max_pixels=16384*28*28),
+    # 'qwen2_vl-72b_full_sft_mmo1_1e_0106': partial(Qwen2VLChat, model_path='/data/jx/pretrained_models/mm-o1/qwen2_vl-72b_full_sft_mmo1_1e_0106/', min_pixels=1280*28*28, max_pixels=16384*28*28),
+    'Qwen2-VL-72B-Instruct': partial(Qwen2VLChat, model_path='/mnt/jiaxili/pretrained_models/Qwen/Qwen2-VL-72B-Instruct/', min_pixels=1280*28*28, max_pixels=16384*28*28),
+    'qwen2_vl-72b_full_sft_mmo1_1e_0106': partial(Qwen2VLChat, model_path='/mnt/jiaxili/pretrained_models/mm-o1/qwen2_vl-72b_full_sft_mmo1_1e_0106/', min_pixels=1280*28*28, max_pixels=16384*28*28),
+    'Qwen2VL-72B-sft-v2': partial(Qwen2VLChat, model_path='/data/jx/pretrained_models/mm-o1/Qwen2VL-72B-sft-v2/', min_pixels=1280*28*28, max_pixels=16384*28*28),
     'Qwen2-VL-72B-Instruct-sft-v1': partial(Qwen2VLChat, model_path='/mnt/zhangh/sicong/mmo1/LLaMA-Factory/saves/qwen2_vl-72b_full-sft_m3cot+llava-reasoner', min_pixels=1280*28*28, max_pixels=16384*28*28),
     'Qwen2-VL-72B-Instruct-sft-v2': partial(Qwen2VLChat, model_path='/mnt/zhangh/sicong/mmo1/LLaMA-Factory/saves/qwen2_vl-72b_full-sft_m3cot+llava-reasoner_v2', min_pixels=1280*28*28, max_pixels=16384*28*28),
     'Qwen2-VL-7B-Instruct': partial(Qwen2VLChat, model_path='/mnt/zhangh/sicong/vl3_data/checkpoints/Qwen/Qwen2-VL-7B-Instruct', min_pixels=1280*28*28, max_pixels=16384*28*28),

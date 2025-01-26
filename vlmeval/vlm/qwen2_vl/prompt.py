@@ -116,6 +116,7 @@ class Qwen2VLPromptMixin:
             prompt += options_prompt
             prompt += MCQ_CN_PROMPT if cn_string(prompt) else MCQ_EN_PROMPT
         prompt = prompt.rstrip()
+        print(prompt)
         msgs = []
         if isinstance(tgt_path, list):
             msgs.extend([dict(type='image', value=p) for p in tgt_path])
@@ -146,7 +147,8 @@ class Qwen2VLPromptMixin:
         """change the prompt for VQA dataset:"""
         VQA_PROMPT = '\nPlease try to answer the question with short words or phrases if possible.'
         # sicong: format CoT prompt
-        VQA_PROMPT = '\nThink step by step and then try to answer the question with short words or phrases if possible.'
+        # VQA_PROMPT = '\nThink step by step and then try to answer the question with short words or phrases if possible.'
+        VQA_PROMPT = '\nCan you elaborate on the logical steps you took to solve this?'
         tgt_path = self.dump_image(line, dataset)
         question = line['question']
         msgs = []

@@ -66,6 +66,10 @@ class ImageVQADataset(ImageBaseDataset):
         for i in range(len(data['prediction'])):
             if "### Answer:" in data['prediction'][i]:
                 data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("### Answer:")[-1].strip()
+            else: 
+                ## use the last line as the prediction
+                data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("\n")[-1].strip()
+            
         data['answer'] = [str(x) for x in data['answer']]
         lt = len(data)
         pool = mp.Pool(16)

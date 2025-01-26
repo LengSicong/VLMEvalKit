@@ -241,6 +241,9 @@ class ImageMCQDataset(ImageBaseDataset):
         for i in range(len(data['prediction'])):
             if "### Answer:" in data['prediction'][i]:
                 data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("### Answer:")[-1].strip()
+            else: 
+                ## use the last line as the prediction
+                data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("\n")[-1].strip()
 
         # If not choice label, then use lower case
         for k in data.keys():
