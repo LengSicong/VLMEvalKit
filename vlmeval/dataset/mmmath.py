@@ -1,17 +1,23 @@
 import re
 import json
-import sympy as sp
+
 import numpy as np
-from sympy import simplify, Eq, sympify, Pow, pi
-from sympy.parsing.latex import parse_latex
 import sys
 import math
 import os
 import argparse
+import timeout_decorator
 
 from .image_base import ImageBaseDataset
 from ..utils import track_progress_rich
 from ..smp import load, dump
+
+try:
+    import sympy as sp
+    from sympy import simplify, Eq, sympify, Pow, pi
+    from sympy.parsing.latex import parse_latex
+except ImportError:
+    logging.warning('sympy is not installed, please install it for MM-Math evaluation.')
 
 
 class AutoScoringJudge:
@@ -124,11 +130,15 @@ class AutoScoringJudge:
             self.precision = precision[idx]
 
             for item2 in temp_list2:
-                if self.is_equal(item1, item2):
-                    temp_list1.remove(item1)
-                    temp_list2.remove(item2)
-                    precision.remove(self.precision)
-                    break
+                try:
+                    if self.is_equal(item1, item2):
+                        temp_list1.remove(item1)
+                        temp_list2.remove(item2)
+                        precision.remove(self.precision)
+                        break
+                except Exception as err:
+                    logging.warning(f'{type(err)}: {err}')
+                    continue
             else:
                 # If no match was found, return False
                 return False
@@ -148,6 +158,8 @@ class AutoScoringJudge:
         # Replaces the symbol for pi in sympy expressions with its numerical value
         return expression_sympy.subs(self.pi, math.pi)
 
+    # Set timeout to 30 seconds for is_equal
+    @timeout_decorator.timeout(30)
     def is_equal(self, expression1, expression2):
         # Default first expression is ground truth. Check if expressions are equal in different aspects
         if expression1 == expression2 and expression1 != "" and expression2 != "":
@@ -215,6 +227,8 @@ class AutoScoringJudge:
         exp1 = extract_expression(exp1)
         exp2 = extract_expression(exp2)
 
+        exp_too_long = len(exp1) > 300 or len(exp2) > 300
+
         expr1_sym = sympify(parse_latex(exp1))
         expr2_sym = sympify(parse_latex(exp2))
         if expr1_sym == expr2_sym:
@@ -232,18 +246,22 @@ class AutoScoringJudge:
                         print("These two numbers cannot be calculated by the current computer for: "
                               f"\"{str(expr1_sym)}\" and \"{str(expr2_sym)}\"")
                         return False
+                    if exp_too_long:
+                        print(f'Expression {exp1} or {exp2} is too long to compute. ')
+                        return False
                     if abs(expr1_sym.evalf() - expr2_sym.evalf()) <= self.precision * 1.01:
                         return True
                     else:
                         return False
                 except:
                     return False
+            elif exp_too_long:
+                print(f'Expression {exp1} or {exp2} is too long to compute. ')
+                return False
             else:
                 try:
                     simplified_expr = simplify(expr1_sym - expr2_sym)
-
                     num_value = simplified_expr.evalf()
-
                     return abs(num_value) < 1e-3
                 except:
                     return False
@@ -409,7 +427,7 @@ class MMMath(ImageBaseDataset):
 
         tups = [dict(expression1=x, expression2=y) for x, y in zip(data['answer'], data['prediction'])]
 
-        res = track_progress_rich(func, tups, nproc=32)
+        res = track_progress_rich(func, tups, nproc=16)
         data['hit'] = res
         dump(data, eval_file)
 

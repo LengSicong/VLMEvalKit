@@ -2,8 +2,6 @@ import os
 import re
 import tempfile
 from functools import partial
-from jinja2.sandbox import SandboxedEnvironment
-from jinja2 import Template
 
 import pandas as pd
 
@@ -11,7 +9,6 @@ from .image_base import ImageBaseDataset
 from .utils import build_judge, DEBUG_MESSAGE
 from ..smp import *
 from ..utils import track_progress_rich
-import ipdb
 
 
 class ImageVQADataset(ImageBaseDataset):
@@ -38,7 +35,7 @@ class ImageVQADataset(ImageBaseDataset):
         'InfoVQA_VAL': '2342e9c225222f0ef4dec545ebb126fe',
         'InfoVQA_TEST': 'df535bf51b88dc9718252c34131a6227',
         'ChartQA_TEST': 'c902e0aa9be5582a7aad6dcf52734b42',
-        'GQA_TestDev_Balanced': 'fead7df22befc1ed3ca2b62ea26fa17b',
+        'GQA_TestDev_Balanced': '99b62f22e224d9b2f32dcbe41359d1c9',
     }
 
     def build_prompt(self, line):
@@ -283,8 +280,9 @@ class MathVista(ImageBaseDataset):
 class MathVerse(ImageBaseDataset):
     TYPE = 'VQA'
     DATASET_URL = {
-        'MathVerse_MINI': 'http://opencompass.openxlab.space/utils/benchmarks/MathVerse/MathVerse_MINI.tsv', # noqa
+        'MathVerse_MINI': 'http://opencompass.openxlab.space/utils/benchmarks/MathVerse/MathVerse_MINIV.tsv', # noqa
         'MathVerse_MINI_Vision_Only': 'http://opencompass.openxlab.space/utils/benchmarks/MathVerse/MathVerse_MINIVOnly.tsv', # noqa
+        'MathVerse_MINI_Vision_Only_cot': 'http://opencompass.openxlab.space/utils/benchmarks/MathVerse/MathVerse_MINIVOnly.tsv', # noqa
         'MathVerse_MINI_Vision_Dominant': 'http://opencompass.openxlab.space/utils/benchmarks/MathVerse/MathVerse_MINIVDom.tsv', # noqa
         'MathVerse_MINI_Vision_Intensive': 'http://opencompass.openxlab.space/utils/benchmarks/MathVerse/MathVerse_MINIVInt.tsv', # noqa
         'MathVerse_MINI_Text_Lite': 'http://opencompass.openxlab.space/utils/benchmarks/MathVerse/MathVerse_MINITLite.tsv', # noqa
@@ -293,11 +291,34 @@ class MathVerse(ImageBaseDataset):
     DATASET_MD5 = {
         'MathVerse_MINI': '5017caca32b7fa110c350a1bea861b65',
         'MathVerse_MINI_Vision_Only': '68a11d4680014ac881fa37adeadea3a4',
+        'MathVerse_MINI_Vision_Only_cot': '68a11d4680014ac881fa37adeadea3a4',
         'MathVerse_MINI_Vision_Dominant': 'b8fb63852d261ab2aaefba29cc2414d3',
         'MathVerse_MINI_Vision_Intensive': '01cbd35be202bb0c4873a4186a63bc19',
         'MathVerse_MINI_Text_Lite': '19e4b13bdd30b89a03b2e358bcfefa04',
         'MathVerse_MINI_Text_Dominant': '4f5cd2fa6630ea00bb11d6fde1f6fe6a',
     }
+
+    # Given one data record, return the built prompt (a multi-modal message), can override
+    def build_prompt(self, line):
+        if isinstance(line, int):
+            line = self.data.iloc[line]
+
+        if self.meta_only:
+            tgt_path = toliststr(line['image_path'])
+        else:
+            tgt_path = self.dump_image(line)
+        if 'cot' in self.dataset_name:
+            question = line['query_cot']
+        else:
+            question = line['question']
+
+        msgs = []
+        if isinstance(tgt_path, list):
+            msgs.extend([dict(type='image', value=p) for p in tgt_path])
+        else:
+            msgs = [dict(type='image', value=tgt_path)]
+        msgs.append(dict(type='text', value=question))
+        return msgs
 
     # It returns a DataFrame
     @classmethod
@@ -380,7 +401,7 @@ class MathVerse(ImageBaseDataset):
             dump(data, storage_score)
 
         score = MathVerse_acc(storage_score)
-        score_pth = storage_score.replace('.xlsx', '_score.csv')
+        score_pth = storage_score.replace('.xlsx', '.csv')
         dump(score, score_pth)
         return score
 
@@ -468,7 +489,7 @@ class OlympiadBench(ImageBaseDataset):
         tgt_path_z = []
         if isinstance(line['image'], list):
             for i in range(len(line['image'])):
-                tgt_path = osp.join(self.img_root, f"{line['index']}--{i+1}.jpg")
+                tgt_path = osp.join(self.img_root, f"{line['index']}--{i + 1}.jpg")
                 if not read_ok(tgt_path):
                     decode_base64_to_image_file(line['image'][i], tgt_path)
                 tgt_path_z.append(tgt_path)
@@ -663,6 +684,80 @@ class OlympiadBench(ImageBaseDataset):
         return accdz
 
 
+class LogicVista(ImageBaseDataset):
+    TYPE = 'VQA'
+    DATASET_URL = {
+        'LogicVista': 'https://opencompass.openxlab.space/utils/VLMEval/LogicVista.tsv'
+    }
+    DATASET_MD5 = {'LogicVista': '41c5d33adf33765c399e0e6ae588c061'}
+
+    def evaluate(self, eval_file, **judge_kwargs):
+        from .utils.logicvista import LogicVista_auxeval, evaluate_logicvista
+
+        # model = judge_kwargs['model']
+        model = judge_kwargs.get('model', 'exact_matching')
+        assert model in ['exact_matching', 'gpt-4-0125', 'gpt-4-turbo', 'gpt-4o-mini'], model
+        name_str_map = {'gpt-4-0125': 'gpt4', 'gpt-4-turbo': 'gpt4-turbo', 'gpt-4o-mini': 'gpt4o-mini'}
+        name_str = name_str_map[model] if model in name_str_map else model
+
+        if model == 'exact_matching':
+            model = None
+        elif gpt_key_set():
+            model = build_judge(**judge_kwargs)
+            if not model.working():
+                warnings.warn('OPENAI API is not working properly, will use exact matching for evaluation')
+                warnings.warn(DEBUG_MESSAGE)
+                model = None
+        else:
+            warnings.warn('OPENAI_API_KEY is not set properly, will use exact matching for evaluation')
+            model = None
+
+        suffix = eval_file.split('.')[-1]
+        storage = eval_file.replace(f'.{suffix}', f'_{name_str}.xlsx')
+        tmp_file = eval_file.replace(f'.{suffix}', f'_{name_str}.pkl')
+        nproc = judge_kwargs.pop('nproc', 4)
+
+        if not osp.exists(storage) and model is not None:
+            data = load(eval_file)
+            model = build_judge(max_tokens=128, **judge_kwargs)
+            assert model.working(), ('LogicVista evaluation requires a working OPENAI API\n' + DEBUG_MESSAGE)
+            lt = len(data)
+            lines = [data.iloc[i] for i in range(lt)]
+            tups = [(model, line) for line in lines]
+            indices = [line['index'] for line in lines]
+
+            ans = {}
+            if osp.exists(tmp_file):
+                ans = load(tmp_file)
+            tups = [x for x, i in zip(tups, indices) if i not in ans]
+            indices = [i for i in indices if i not in ans]
+
+            if len(indices):
+                new_results = track_progress_rich(
+                    LogicVista_auxeval,
+                    tups,
+                    nproc=nproc,
+                    chunksize=nproc,
+                    keys=indices,
+                    save=tmp_file,
+                )
+                ans = load(tmp_file)
+                for k, v in zip(indices, new_results):
+                    assert k in ans
+                    assert ans[k]['log'] == v['log'] and ans[k]['res'] == v['res'] and ans[k]['hit'] == v['hit']
+
+            data['res'] = [ans[idx]['res'] for idx in data['index']]
+            data['log'] = [ans[idx]['log'] for idx in data['index']]
+            data['hit'] = [ans[idx]['hit'] for idx in data['index']]
+
+            dump(data, storage)
+        if osp.exists(storage):
+            accuracy_scores = evaluate_logicvista(storage)
+            score_pth = storage.replace('.xlsx', '_score.csv')
+            dump(accuracy_scores, score_pth)
+
+            return accuracy_scores
+
 class LLaVABench(ImageBaseDataset):
     TYPE = 'VQA'
     DATASET_URL = {'LLaVABench': 'https://opencompass.openxlab.space/utils/VLMEval/LLaVABench.tsv'}
@@ -705,9 +800,10 @@ class LLaVABench(ImageBaseDataset):
 class MMVet(ImageBaseDataset):
     TYPE = 'VQA'
     DATASET_URL = {
-        'MMVet': 'https://opencompass.openxlab.space/utils/VLMEval/MMVet.tsv'
+        'MMVet': 'https://opencompass.openxlab.space/utils/VLMEval/MMVet.tsv',
+        'MMVet_Hard': 'http://opencompass.openxlab.space/utils/VLMEval/MMVet_Hard.tsv'
     }
-    DATASET_MD5 = {'MMVet': '748aa6d4aa9d4de798306a63718455e3'}
+    DATASET_MD5 = {'MMVet': '748aa6d4aa9d4de798306a63718455e3', 'MMVet_Hard': '63a598819a936a2e77c410a78a21ff16'}
 
     # It returns a DataFrame
     @classmethod
@@ -982,7 +1078,7 @@ class QSpatial(ImageBaseDataset):
 
     # Given one data record, return the built prompt (a multi-modal message), can override
     def build_prompt(self, line):
-
+        from jinja2.sandbox import SandboxedEnvironment
         text_prompt_template = self._prompt_templates["spatial_prompt_single"]
         env = SandboxedEnvironment()
         text_prompt = env.from_string(text_prompt_template).render(question=line["question"])
@@ -1179,3 +1275,172 @@ class QSpatial(ImageBaseDataset):
         score_pth = eval_file.replace('.xlsx', '_score.json')
         dump(final_score_dict, score_pth)
         return final_score_dict
+
+
+class MMNIAH(ImageBaseDataset):
+    TYPE = 'VQA'
+    DATASET_URL = {
+        'MM_NIAH_VAL':
+            'https://huggingface.co/datasets/petter12321/MM-NIAH-VLMEvalKit/resolve/main/MM_NIAH_VAL.tsv',
+        'MM_NIAH_TEST':
+            ['https://huggingface.co/datasets/petter12321/MM-NIAH-VLMEvalKit/resolve/main/part-aa',
+             'https://huggingface.co/datasets/petter12321/MM-NIAH-VLMEvalKit/resolve/main/part-ab',
+             'https://huggingface.co/datasets/petter12321/MM-NIAH-VLMEvalKit/resolve/main/part-ac',
+             'https://huggingface.co/datasets/petter12321/MM-NIAH-VLMEvalKit/resolve/main/part-ad',
+             'https://huggingface.co/datasets/petter12321/MM-NIAH-VLMEvalKit/resolve/main/part-ae']}
+    DATASET_MD5 = {'MM_NIAH_VAL': '27e5a8c3cef7746cb38f89cd86c474c5',
+                   'MM_NIAH_TEST': 'f490eb2a43096307465fe9e7ef13497c'}
+
+    def prepare_tsv(self, url, file_md5=None):
+        import os
+        data_root = LMUDataRoot()
+        os.makedirs(data_root, exist_ok=True)
+        update_flag = False
+        file_name = 'MM_NIAH_VAL.tsv' if 'MM_NIAH_VAL' in url else 'MM_NIAH_TEST.tsv'
+        data_path = osp.join(data_root, file_name)
+        if osp.exists(data_path) and (file_md5 is None or md5(data_path) == file_md5):
+            pass
+        elif file_name == 'MM_NIAH_TEST.tsv':
+            warnings.warn('The dataset tsv is not downloaded')
+            for i in range(len(url)):
+                if osp.exists(osp.join(data_root, 'part-a' + chr(ord('a') + i))):
+                    print('part_a' + chr(ord('a') + i) + ' is existed')
+                    continue
+                download_file(url[i], data_path)
+            file_prefix = 'part-'
+            output_file = data_path
+            split_files = sorted([f for f in os.listdir(data_root) if f.startswith(file_prefix)])
+            with open(output_file, 'wb') as outfile:
+                # 逐个读取每个拆分文件并写入到输出文件
+                for filename in split_files:
+                    with open(osp.join(data_root, filename), 'rb') as infile:
+                        outfile.write(infile.read())
+            update_flag = True
+        else:
+            warnings.warn('The dataset tsv is not downloaded')
+            download_file(url, data_path)
+            update_flag = True
+
+        if file_size(data_path, 'GB') > 1:
+            local_path = data_path.replace('.tsv', '_local.tsv')
+            if not osp.exists(local_path) or os.environ.get('FORCE_LOCAL', None) or update_flag:
+                from ..tools import LOCALIZE
+                LOCALIZE(data_path, local_path)
+            data_path = local_path
+        return load(data_path)
+
+    @classmethod
+    def evaluate(self, eval_file, **judge_kwargs):
+        from .utils.mmniah import is_correct
+        # find-image, count-text, find-text,
+        # infer-choose, count-image, visual-reasoning
+        MMNIAH_score = {
+            'count-text': 0,
+            'find-image': 0,
+            'find-text': 0,
+            'infer-choose': 0,
+            'count-image': 0,
+            'visual-reasoning': 0,
+            'total': 0,
+        }
+        MMNIAH_num = {
+            'count-text': 0,
+            'find-image': 0,
+            'find-text': 0,
+            'infer-choose': 0,
+            'count-image': 0,
+            'visual-reasoning': 0,
+            'total': 0,
+        }
+        final_score_dict = {
+            'count-text': 0,
+            'find-image': 0,
+            'find-text': 0,
+            'infer-choose': 0,
+            'count-image': 0,
+            'visual-reasoning': 0,
+            'total': 0,
+        }
+        data = load(eval_file)
+        lt = len(data)
+        lines = [data.iloc[i] for i in range(lt)]
+        for i in tqdm(range(len(lines))):
+            line = lines[i]
+            predict = line['prediction']
+            answers = line['answer']
+            category = line['category']
+            if category in ['visual-reasoning', 'find-image']:
+                answers = int(answers)
+            if is_correct(answers, predict):
+                MMNIAH_score[category] += 1
+                MMNIAH_score['total'] += 1
+            MMNIAH_num[category] += 1
+            MMNIAH_num['total'] += 1
+
+        for category in ['find-image', 'count-text', 'find-text',
+                         'infer-choose', 'count-image', 'visual-reasoning', 'total']:
+            if MMNIAH_num[category] != 0:
+                final_score_dict[category] = MMNIAH_score[category] / MMNIAH_num[category]
+            else:
+                final_score_dict[category] = None
+
+        score_pth = eval_file.replace('.xlsx', '_score.json')
+        dump(final_score_dict, score_pth)
+        return final_score_dict
+
+    def build_prompt(self, line):
+        msgs = super().build_prompt(line)
+        if isinstance(line, int):
+            line = self.data.iloc[line]
+        totalchoice = line['multi-choice options']
+        totalchoice = eval(totalchoice)
+        # find-image, count-text, find-text,
+        # infer-choose, count-image, visual-reasoning
+        context = msgs[-1]['value']
+        context = eval(context)
+        question = context[0] + '\n' + context[1]
+        # tgt_path是所有图像地址列表
+        tgt_path = []
+        for i in range(len(msgs) - 1):
+            tgt_path.append(msgs[i]['value'])
+        choices = totalchoice[0]
+        choices_image = totalchoice[1]
+        if choices:
+            for c_idx, c in enumerate(choices):
+                question = f"{question}\n{chr(c_idx + ord('A'))}. {c}"
+            question += "\nAnswer with the option's letter from the given choices directly."
+        elif choices_image:
+            for c_idx in range(len(choices_image)):
+                question = f"{question}\n{chr(c_idx + ord('A'))}. <image>"
+            question += "\nAnswer with the option's letter from the given choices directly."
+        else:
+            question += '\nAnswer the question using a single word or phrase.'
+        question = '<start>' + question + '<end>'
+        question = question.split('<image>')
+        if choices_image:
+            for i in range(len(question) - 5):
+                question[i] = question[i] + '\n<image>'
+            for i in range(len(question) - 5, len(question) - 1):
+                question[i] = question[i] + '<image>'
+        else:
+            for i in range(len(question) - 1):
+                question[i] = question[i] + '\n<image>'
+        assert len(tgt_path) + 1 == len(question)
+        context = []
+        for i in range(len(tgt_path)):
+            context.append(question[i])
+            context.append(tgt_path[i])
+        context.append(question[-1])
+        context[0] = context[0][7:]
+        context[-1] = context[-1][:-5]
+        msgs = []
+        for i in range(len(context)):
+            if i % 2 == 0:
+                msgs.append(dict(type='text', value=context[i]))
+            else:
+                ROOT = LMUDataRoot()
+                msgs.append(dict(type='image', value=osp.join(osp.join(ROOT, 'images', self.dataset_name), context[i])))
+        for element in msgs:
+            if element['value'] == '':
+                msgs.remove(element)
+        return msgs

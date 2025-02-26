@@ -38,12 +38,12 @@ class OpenAIWrapper(BaseAPI):
                  retry: int = 5,
                  wait: int = 5,
                  key: str = None,
-                 verbose: bool = True,
+                 verbose: bool = False,
                  system_prompt: str = None,
                  temperature: float = 0,
                  timeout: int = 60,
                  api_base: str = None,
-                 max_tokens: int = 1024,
+                 max_tokens: int = 2048,
                  img_size: int = 512,
                  img_detail: str = 'low',
                  use_azure: bool = True,
@@ -57,7 +57,7 @@ class OpenAIWrapper(BaseAPI):
         self.temperature = temperature
         self.use_azure = use_azure
 
-        if 'step-1v' in model:
+        if 'step' in model:
             env_key = os.environ.get('STEPAI_API_KEY', '')
             if key is None:
                 key = env_key
@@ -67,6 +67,10 @@ class OpenAIWrapper(BaseAPI):
                 key = env_key
         elif 'internvl2-pro' in model:
             env_key = os.environ.get('InternVL2_PRO_KEY', '')
+            if key is None:
+                key = env_key
+        elif 'abab' in model:
+            env_key = os.environ.get('MiniMax_API_KEY', '')
             if key is None:
                 key = env_key
         else:
@@ -174,16 +178,16 @@ class OpenAIWrapper(BaseAPI):
         temperature = kwargs.pop('temperature', self.temperature)
         max_tokens = kwargs.pop('max_tokens', self.max_tokens)
 
-        context_window = GPT_context_window(self.model)
-        new_max_tokens = min(max_tokens, context_window - self.get_token_len(inputs))
-        if 0 < new_max_tokens <= 100 and new_max_tokens < max_tokens:
-            self.logger.warning(
-                'Less than 100 tokens left, '
-                'may exceed the context window with some additional meta symbols. '
-            )
-        if new_max_tokens <= 0:
-            return 0, self.fail_msg + 'Input string longer than context window. ', 'Length Exceeded. '
-        max_tokens = new_max_tokens
+        # context_window = GPT_context_window(self.model)
+        # new_max_tokens = min(max_tokens, context_window - self.get_token_len(inputs))
+        # if 0 < new_max_tokens <= 100 and new_max_tokens < max_tokens:
+        #     self.logger.warning(
+        #         'Less than 100 tokens left, '
+        #         'may exceed the context window with some additional meta symbols. '
+        #     )
+        # if new_max_tokens <= 0:
+        #     return 0, self.fail_msg + 'Input string longer than context window. ', 'Length Exceeded. '
+        # max_tokens = new_max_tokens
 
         # Will send request if use Azure, dk how to use openai client for it
         if self.use_azure:
@@ -240,8 +244,12 @@ class OpenAIWrapper(BaseAPI):
         try:
             enc = tiktoken.encoding_for_model(self.model)
         except Exception as err:
-            self.logger.warning(f'{type(err)}: {err}')
-            enc = tiktoken.encoding_for_model('gpt-4')
+            if 'gpt' in self.model.lower():
+                if self.verbose:
+                    self.logger.warning(f'{type(err)}: {err}')
+                enc = tiktoken.encoding_for_model('gpt-4')
+            else:
+                return 0
         assert isinstance(inputs, list)
         tot = 0
         for item in inputs:
