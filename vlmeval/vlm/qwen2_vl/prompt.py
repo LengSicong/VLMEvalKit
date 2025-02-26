@@ -88,7 +88,8 @@ class Qwen2VLPromptMixin:
         MCQ_CN_PROMPT = '请直接回答选项字母。'
         MCQ_EN_PROMPT = 'Please select the correct answer from the options above.'
         # sicong: format CoT prompt
-        MCQ_EN_PROMPT = ' Think step by step and then select the correct answer from the options above.'
+        # MCQ_EN_PROMPT = ' Think step by step and then select the correct answer from the options above.'
+        MCQ_EN_PROMPT = ' Think step by step.'
 
         import string
 
@@ -148,7 +149,8 @@ class Qwen2VLPromptMixin:
         VQA_PROMPT = '\nPlease try to answer the question with short words or phrases if possible.'
         # sicong: format CoT prompt
         # VQA_PROMPT = '\nThink step by step and then try to answer the question with short words or phrases if possible.'
-        VQA_PROMPT = '\nCan you elaborate on the logical steps you took to solve this?'
+        # VQA_PROMPT = '\nCan you elaborate on the logical steps you took to solve this?'
+        VQA_PROMPT = ' Think step by step.'
         tgt_path = self.dump_image(line, dataset)
         question = line['question']
         msgs = []

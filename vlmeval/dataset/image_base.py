@@ -90,6 +90,7 @@ class ImageBaseDataset:
         else:
             warnings.warn('The dataset tsv is not downloaded')
             download_file(url, data_path)
+            print(f"Downloaded {file_name} to {data_path}")
             update_flag = True
 
         if file_size(data_path, 'GB') > 1:

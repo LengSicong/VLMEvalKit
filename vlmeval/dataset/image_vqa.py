@@ -66,6 +66,8 @@ class ImageVQADataset(ImageBaseDataset):
         for i in range(len(data['prediction'])):
             if "### Answer:" in data['prediction'][i]:
                 data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("### Answer:")[-1].strip()
+            elif "### Final Answer:" in data['prediction'][i]:
+                data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("### Final Answer:")[-1].strip()
             else: 
                 ## use the last line as the prediction
                 data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("\n")[-1].strip()
