@@ -4,6 +4,7 @@ from .image_base import ImageBaseDataset
 from .utils import build_judge, DEBUG_MESSAGE
 from ..smp import *
 import pandas as pd
+import re
 
 MMMB_URLS = {
     'MMMB_ar': 'https://huggingface.co/datasets/AIDC-AI/Parrot-dataset/resolve/main/mmmb/mmmb_ar.tsv',
@@ -181,7 +182,9 @@ class ImageMCQDataset(ImageBaseDataset):
         for key, item in options.items():
             options_prompt += f'{key}. {item}\n'
         hint = line['hint'] if ('hint' in line and not pd.isna(line['hint'])) else None
-        prompt = ''
+        # prompt = ''
+        # prompt = "A conversation between User and Assistant. The User provides an image and asks a question. The Assistant first analyzes both the image and the question, then carefully thinks about the reasoning process step by step, and finally provides the User with an accurate answer. The Assistant must carefully checkout the correctness and validity of each reasoning step. If any errors or inconsistencies are found during the reasoning process, the Assistant reflects and corrects them logically. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e., <think> reasoning process here, with potential reflections and corrections </think><answer> final answer here. </answer>.\n"
+        prompt = """A conversation between User and Assistant. The User provides an image and asks a question. The Assistant first analyzes both the image and the question, then carefully thinks about the reasoning process step by step, and finally provides the User with an accurate answer. The Assistant must carefully checkout the correctness and validity of each reasoning step. If any errors or inconsistencies are found during the reasoning process, the Assistant reflects and corrects them logically. The reasoning process and answer are enclosed within <think> </think> and <answer> </answer> tags, respectively, i.e., <think> reasoning process here, with potential reflections and corrections </think><answer> final answer here, with the key result enclosed in \boxed{} </answer>."""
         if hint is not None:
             prompt += f'Hint: {hint}\n'
         prompt += f'Question: {question}\n'
@@ -219,21 +222,22 @@ class ImageMCQDataset(ImageBaseDataset):
 
         suffix = eval_file.split('.')[-1]
         model = judge_kwargs.get('model', 'exact_matching')
-        assert model in ['chatgpt-0125', 'exact_matching', 'gpt-4-0125']
-        name_str_map = {'chatgpt-0125': 'openai', 'gpt-4-0125': 'gpt4'}
+        print("Using model:", model)
+        assert model in ['chatgpt-0125', 'exact_matching', 'gpt-4-0125', 'gpt-4o-mini']
+        name_str_map = {'chatgpt-0125': 'openai', 'gpt-4-0125': 'gpt4', 'gpt-4o-mini': 'gpt4o-mini'}
         name_str = name_str_map[model] if model in name_str_map else model
 
         if model == 'exact_matching':
             model = None
-        elif gpt_key_set():
-            model = build_judge(**judge_kwargs)
-            if not model.working():
-                warnings.warn('OPENAI API is not working properly, will use exact matching for evaluation')
-                warnings.warn(DEBUG_MESSAGE)
-                model = None
-        else:
-            warnings.warn('OPENAI_API_KEY is not set properly, will use exact matching for evaluation')
+        # elif gpt_key_set():
+        model = build_judge(**judge_kwargs)
+        if not model.working():
+            warnings.warn('OPENAI API is not working properly, will use exact matching for evaluation')
+            warnings.warn(DEBUG_MESSAGE)
             model = None
+        # else:
+        #     warnings.warn('OPENAI_API_KEY is not set properly, will use exact matching for evaluation')
+        #     model = None
 
         result_file = eval_file.replace(f'.{suffix}', f'_{name_str}_result.pkl')
 
@@ -249,13 +253,28 @@ class ImageMCQDataset(ImageBaseDataset):
                 data.loc[i, 'prediction'] = data.loc[i, 'prediction'][:-1]
         # if "### Answer:" in the prediction, only keep content after it, and strip
         for i in range(len(data['prediction'])):
-            if "### Answer:" in data['prediction'][i]:
-                data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("### Answer:")[-1].strip()
-            elif "### Final Answer:" in data['prediction'][i]:
-                data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("### Final Answer:")[-1].strip()
-            else: 
-                ## use the last line as the prediction
-                data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("\n")[-1].strip()
+            # if "### Answer:" in data['prediction'][i]:
+            #     data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("### Answer:")[-1].strip()
+            # elif "### Final Answer:" in data['prediction'][i]:
+            #     data.loc[i, 'prediction'] = data.loc[i, 'prediction'].split("### Final Answer:")[-1].strip()
+            if re.search(r'<answer>(.*?)</answer>', data['prediction'][i], re.DOTALL):
+                ## extract the answer from the prediction, answer is enclosed in <answer></answer>
+                answer = re.search(r'<answer>(.*?)</answer>', data['prediction'][i], re.DOTALL)
+                ## use the last three lines from the answer as the prediction if more than three lines, else use the answer
+                answer = answer.group(1).strip()
+                lines = answer.split("\n")
+                if len(lines) > 3:
+                    data.loc[i, 'prediction'] = "\n".join(lines[-3:]).strip()
+                else:
+                    data.loc[i, 'prediction'] = lines[-1].strip()
+                print(data.loc[i, 'prediction'])
+            else:
+                # use the last three lines as the prediction if more then three lines, else use the last line
+                lines = data.loc[i, 'prediction'].strip().split("\n")
+                if len(lines) > 3:
+                    data.loc[i, 'prediction'] = "\n".join(lines[-3:]).strip()
+                else:
+                    data.loc[i, 'prediction'] = lines[-1].strip()
 
         # If not choice label, then use lower case
         for k in data.keys():

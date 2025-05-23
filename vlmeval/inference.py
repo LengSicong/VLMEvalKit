@@ -57,6 +57,8 @@ def infer_data_api(model, work_dir, model_name, dataset, index_set=None, api_npr
 
     gen_func = model.generate
     structs = [dict(message=struct, dataset=dataset_name) for struct in structs]
+    print("Visualize the first struct:")
+    print(structs[0])
 
     if len(structs):
         track_progress_rich(gen_func, structs, nproc=api_nproc, chunksize=api_nproc, save=out_file, keys=indices)
@@ -95,6 +97,7 @@ def infer_data(model, model_name, work_dir, dataset, out_file, verbose=False, ap
     # Data need to be inferred
     data = data[~data['index'].isin(res)]
     lt = len(data)
+    print("Number of data to be inferred:", lt)
 
     model = supported_VLM[model_name]() if isinstance(model, str) else model
 
@@ -127,6 +130,8 @@ def infer_data(model, model_name, work_dir, dataset, out_file, verbose=False, ap
         else:
             struct = dataset.build_prompt(data.iloc[i])
 
+        if i == 0:
+            print(struct)
         response = model.generate(message=struct, dataset=dataset_name)
         torch.cuda.empty_cache()
 

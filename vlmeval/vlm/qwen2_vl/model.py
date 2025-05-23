@@ -100,13 +100,13 @@ class Qwen2VLChat(Qwen2VLPromptMixin, BaseModel):
         self.model_path = model_path
         MODEL_CLS = None  
 
-        if '2.5' in model_path:
+        if '2.5' in model_path or "qwen25" in model_path or "qwen2_5" in model_path:
             from transformers import Qwen2_5_VLForConditionalGeneration, AutoProcessor
             MODEL_CLS = Qwen2_5_VLForConditionalGeneration
             self.processor = AutoProcessor.from_pretrained(model_path, torch_dtype=torch.bfloat16, attn_implementation='flash_attention_2')
         else:
             from transformers import Qwen2VLForConditionalGeneration, Qwen2VLProcessor
-            MODEL_CLS = Qwen2VLForConditionalGeneration
+            MODEL_CLS = Qwen2VLForConditionalGenerfation
             self.processor = Qwen2VLProcessor.from_pretrained(model_path, torch_dtype=torch.bfloat16, attn_implementation='flash_attention_2')
 
         gpu_mems = get_gpu_memory()

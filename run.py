@@ -340,7 +340,9 @@ def main():
                         if listinstr(['WeMath'], dataset_name):
                             judge_kwargs['model'] = 'gpt-4o-mini'
                         else:
-                            judge_kwargs['model'] = 'chatgpt-0125'
+                            # judge_kwargs['model'] = 'chatgpt-0125'
+                            ## jiaxi: use gpt-4o-mini for all datasets
+                            judge_kwargs['model'] = 'gpt-4o-mini'
                     elif listinstr(['MMVet', 'LLaVABench', 'MMBench-Video'], dataset_name):
                         judge_kwargs['model'] = 'gpt-4-turbo'
                     elif listinstr(['MathVista', 'MathVerse', 'MathVision', 'DynaMath', 'VL-RewardBench', 'LogicVista'], dataset_name):  # noqa: E501

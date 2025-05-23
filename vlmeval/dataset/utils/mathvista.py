@@ -1,5 +1,6 @@
 from ...smp import *
 from ...utils import can_infer
+import re
 
 
 FAIL_MSG = 'Failed to obtain answer via API.'
@@ -57,12 +58,37 @@ Then extract the answer from the model response and type it at the end of the pr
 """
     question = line['question']
     prediction = str(line['prediction'])
+    # ## extract the answer from the prediction, answer is enclosed in <answer></answer>
+    # answer = re.search(r'<answer>(.*?)</answer>', prediction, re.DOTALL)
+    # if answer:
+    #     answer = answer.group(1)
+    # else:
+    #     answer = prediction
+    # print("Extracted answer:", answer)
+
+    if re.search(r'<answer>(.*?)</answer>', prediction, re.DOTALL):
+        ## extract the answer from the prediction, answer is enclosed in <answer></answer>
+        answer = re.search(r'<answer>(.*?)</answer>', prediction, re.DOTALL)
+        ## use the last three lines from the answer as the prediction if more than three lines, else use the answer
+        answer = answer.group(1).strip()
+        lines = answer.split("\n")
+        if len(lines) > 3:
+            extracted = "\n".join(lines[-3:]).strip()
+        else:
+            extracted = lines[-1].strip()
+    else:
+        # use the last three lines as the prediction if more then three lines, else use the last line
+        lines = prediction.strip().split("\n")
+        if len(lines) > 3:
+            extracted = "\n".join(lines[-3:]).strip()
+        else:
+            extracted = lines[-1].strip()
     prompt = task_description
     examples = get_gpt4_ICE()
     for example in examples:
         prompt += example + '\n'
     prompt += question + '\n'
-    prompt += 'Model respone: ' + prediction
+    prompt += 'Model respone: ' + extracted
     prompt += 'Extracted answer:'
     return prompt
 

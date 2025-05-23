@@ -152,7 +152,14 @@ class Qwen2VLPromptMixin:
         # VQA_PROMPT = '\nCan you elaborate on the logical steps you took to solve this?'
         VQA_PROMPT = ' Think step by step.'
         tgt_path = self.dump_image(line, dataset)
-        question = line['question']
+        # if "cot" in dataset.lower():
+        #     question = line['query_cot']
+        # else:
+        #     question = line['question']
+        if "query_cot" in line.keys():
+            question = line['query_cot']
+        else:
+            question = line['question']
         msgs = []
         if isinstance(tgt_path, list):
             msgs.extend([dict(type='image', value=p) for p in tgt_path])

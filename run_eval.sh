@@ -1,0 +1,4 @@
+python run.py --data MMMU_DEV_VAL,MathVista_MINI --model lmdeploy_sft_0502_v1 --verbose --api-nproc 16 --work-dir outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0502_v1 --reuse
+python run.py --data MMMU_DEV_VAL,MathVista_MINI --model lmdeploy_sft_0502_v2_rlvr5k --verbose --api-nproc 16 --work-dir outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0502_v2_rlvr5k --reuse
+python run.py --data MMMU_DEV_VAL,MathVista_MINI --model lmdeploy_sft_0502_v3_rlvr10k --verbose --api-nproc 16 --work-dir outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0502_v3_rlvr10k --reuse
+python run.py --data MMMU_DEV_VAL,MathVista_MINI --model lmdeploy_sft_0502_v4 --verbose --api-nproc 16 --work-dir outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0502_v4 --reuse
