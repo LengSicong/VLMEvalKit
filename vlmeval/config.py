@@ -199,6 +199,14 @@ api_models = {
     'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt1868_tmp02': partial(LMDeployAPI, api_base='http://0.0.0.0:23413/v1/chat/completions', temperature=0.2, retry=10, max_tokens=8192, timeout=300),
     'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt2330': partial(LMDeployAPI, api_base='http://0.0.0.0:23414/v1/chat/completions', temperature=0, retry=10, max_tokens=8192, timeout=300),
     'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt2330_tmp02': partial(LMDeployAPI, api_base='http://0.0.0.0:23415/v1/chat/completions', temperature=0.2, retry=10, max_tokens=8192, timeout=300),
+    'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt19000': partial(LMDeployAPI, api_base='http://0.0.0.0:23456/v1/chat/completions', temperature=0, retry=10, max_tokens=8192, timeout=300),
+    'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt19000_tmp02': partial(LMDeployAPI, api_base='http://0.0.0.0:23457/v1/chat/completions', temperature=0.2, retry=10, max_tokens=8192, timeout=300),
+    'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt20000': partial(LMDeployAPI, api_base='http://0.0.0.0:23458/v1/chat/completions', temperature=0, retry=10, max_tokens=8192, timeout=300),
+    'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt20000_tmp02': partial(LMDeployAPI, api_base='http://0.0.0.0:23459/v1/chat/completions', temperature=0.2, retry=10, max_tokens=8192, timeout=300),
+    'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21000': partial(LMDeployAPI, api_base='http://0.0.0.0:23460/v1/chat/completions', temperature=0, retry=10, max_tokens=8192, timeout=300),
+    'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21000_tmp02': partial(LMDeployAPI, api_base='http://0.0.0.0:23461/v1/chat/completions', temperature=0.2, retry=10, max_tokens=8192, timeout=300),
+    'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21935': partial(LMDeployAPI, api_base='http://0.0.0.0:23462/v1/chat/completions', temperature=0, retry=10, max_tokens=8192, timeout=300),
+    'lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21935_tmp02': partial(LMDeployAPI, api_base='http://0.0.0.0:23463/v1/chat/completions', temperature=0.2, retry=10, max_tokens=8192, timeout=300),
     # Taichu-VL
     'Taichu-VL-2B': partial(TaichuVLAPI, model='Taichu-VL-2B', url='https://platform.wair.ac.4444444444444rrcn/api/v1/infer/10381/v1/chat/completions'),
     #doubao_vl

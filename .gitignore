@@ -165,6 +165,7 @@ cache_dir/*
 
 # Evaluation Outputs
 outputs/*
+outputs_vanilla_prompt/*
 demo.ipynb
 *json
 .vscode

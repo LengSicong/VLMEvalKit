@@ -77,9 +77,16 @@ models=(
     # "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt1401_tmp02"
     # "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt1868"
     # "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt1868_tmp02"
-    "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt2330"
-    "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt2330_tmp02"
-    
+    # "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt2330"
+    # "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt2330_tmp02"
+    "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt19000"
+    "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt19000_tmp02"
+    "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt20000"
+    "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt20000_tmp02"
+    "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21000"
+    "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21000_tmp02"
+    "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21935"
+    "lmdeploy_mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21935_tmp02"
 )
 
 work_dirs=(
@@ -158,8 +165,16 @@ work_dirs=(
     # "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt1401_tmp02"
     # "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt1868"
     # "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt1868_tmp02"
-    "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt2330"
-    "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt2330_tmp02"
+    # "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt2330"
+    # "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_raven_ep5_ckpt2330_tmp02"
+    "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt19000"
+    "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt19000_tmp02"
+    "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt20000"
+    "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt20000_tmp02"
+    "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21000"
+    "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21000_tmp02"
+    "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21935"
+    "outputs/mmo1-math-qwen2.5_vl_7b-sft_mmr1_sft_0503_v10_mathinstruct_plusgemini_ep5_ckpt21935_tmp02"
 
 )
 
