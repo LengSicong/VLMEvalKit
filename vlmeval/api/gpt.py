@@ -46,17 +46,19 @@ class OpenAIWrapper(BaseAPI):
                  max_tokens: int = 2048,
                  img_size: int = 512,
                  img_detail: str = 'low',
-                 use_azure: bool = True,
+                 use_azure: bool = False,
+                 use_idealab: bool = True,
                  **kwargs):
 
         self.model = model
-        self.model = 'gpt-4-1106-Preview' # Sicong: only use gpt-3.5-turbo-0613
+        # self.model = 'gpt-4-1106-Preview' # Sicong: only use gpt-3.5-turbo-0613
+        self.model = 'gpt-4o-mini-0718' # Jiaxi: update to gpt-4o-mini
         self.cur_idx = 0
         self.fail_msg = 'Failed to obtain answer via API. '
         self.max_tokens = max_tokens
         self.temperature = temperature
         self.use_azure = use_azure
-
+        self.use_idealab = use_idealab
         if 'step' in model:
             env_key = os.environ.get('STEPAI_API_KEY', '')
             if key is None:
@@ -82,6 +84,15 @@ class OpenAIWrapper(BaseAPI):
                     key = env_key
                 assert isinstance(key, str), (
                     'Please set the environment variable AZURE_OPENAI_API_KEY to your openai key. '
+                )
+            elif use_idealab:
+                env_key = os.environ.get('IDEALAB_API_KEY', None)
+                assert env_key is not None, 'Please set the environment variable IDEALAB_API_KEY. '
+
+                if key is None:
+                    key = env_key
+                assert isinstance(key, str), (
+                    'Please set the environment variable IDEALAB_API_KEY to your openai key. '
                 )
             else:
                 env_key = os.environ.get('OPENAI_API_KEY', '')
@@ -117,6 +128,8 @@ class OpenAIWrapper(BaseAPI):
                 deployment_name=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME'),
                 api_version=os.getenv('OPENAI_API_VERSION')
             )
+        elif use_idealab:
+            self.api_base = 'https://idealab.alibaba-inc.com/api/openai/v1/chat/completions'
         else:
             if api_base is None:
                 if 'OPENAI_API_BASE' in os.environ and os.environ['OPENAI_API_BASE'] != '':
@@ -216,6 +229,7 @@ class OpenAIWrapper(BaseAPI):
             if self.verbose:
                 self.logger.error(f'{type(err)}: {err}')
                 self.logger.error(response.text if hasattr(response, 'text') else response)
+            answer = self.fail_msg
 
         return ret_code, answer, response
 

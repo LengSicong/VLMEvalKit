@@ -219,6 +219,8 @@ api_models = {
     'lmdeploy_qwen2_5_vl_7b_mmr1_mminstruct_coldstart_rlv6_wllm_response4k_rolloutn32_learn08_bleu02_0618_step100_tmp02': partial(LMDeployAPI, api_base='http://0.0.0.0:23473/v1/chat/completions', temperature=0.2, retry=10, max_tokens=8192, timeout=300),
     'lmdeploy_qwen2_5_vl_7b_mmr1_mminstruct_coldstart_rlv6_wllm_response4k_rolloutn32_shuffle_0618_step100': partial(LMDeployAPI, api_base='http://0.0.0.0:23474/v1/chat/completions', temperature=0, retry=10, max_tokens=8192, timeout=300),
     'lmdeploy_qwen2_5_vl_7b_mmr1_mminstruct_coldstart_rlv6_wllm_response4k_rolloutn32_shuffle_0618_step100_tmp02': partial(LMDeployAPI, api_base='http://0.0.0.0:23475/v1/chat/completions', temperature=0.2, retry=10, max_tokens=8192, timeout=300),
+    'lmdeploy_mmo1-math-qwen2.5_vl_3b-sft_mmr1_sft_0503_v10_mathinstruct_onlygemini_ep5': partial(LMDeployAPI, api_base='http://0.0.0.0:23476/v1/chat/completions', temperature=0, retry=10, max_tokens=8192, timeout=300),
+    'lmdeploy_mmo1-math-qwen2.5_vl_3b-sft_mmr1_sft_0503_v10_mathinstruct_onlygemini_ep5_tmp02': partial(LMDeployAPI, api_base='http://0.0.0.0:23477/v1/chat/completions', temperature=0.2, retry=10, max_tokens=8192, timeout=300),
     # Taichu-VL
     'Taichu-VL-2B': partial(TaichuVLAPI, model='Taichu-VL-2B', url='https://platform.wair.ac.4444444444444rrcn/api/v1/infer/10381/v1/chat/completions'),
     #doubao_vl
