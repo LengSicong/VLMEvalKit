@@ -167,6 +167,7 @@ cache_dir/*
 outputs/*
 outputs_vanilla_prompt/*
 outputs_rl_prompt/*
+outputs_ia/*
 demo.ipynb
 *json
 .vscode
